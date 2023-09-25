@@ -2,20 +2,19 @@ const User = require('../models/User.model');
 const sanitize = require('mongo-sanitize');
 const bcrypt = require('bcryptjs');
 const getImageFileType = require('../utils/getImageFileType');
-const fs = require('fs');
-const path = require('path');
-
+const deleteUploadedFile = require('../utils/deleteUploadedFile');
 
 exports.register = async (req, res) => {
 	try {
 		const login = sanitize(req.body.login);
 		const password = sanitize(req.body.password);
+		const phone = sanitize(req.body.phone);
 
 		if (login && typeof login === 'string' && password && typeof password === 'string') {
 			const loginUser = await User.findOne({ login });
 
 			if (loginUser) {
-				fs.unlinkSync((path.join(__dirname + '/public/upload/' + req.file.filename)));
+				deleteUploadedFile(req.file.filename);
 				return res.status(409).send({ message: 'User with this login already exist' });
 			}
 			
@@ -25,15 +24,18 @@ exports.register = async (req, res) => {
 			const user = await User.create({ 
 				login, 
 				password: await bcrypt.hash(password, 10),
-				avatar 
+				avatar,
+				phone
 			});
-			res.status(201).send({ message: 'User created' + user.login });
+			res.status(201).send({ message: 'User created ' + user.login });
 
 		} else {
+			deleteUploadedFile(req.file.filename);
 			res.status(400).send({ message: 'Bed request' });
 		}
 
 	} catch (err) {
+		deleteUploadedFile(req.file.filename);
 		res.status(500).send({ message: err.message });
 	}
 };
