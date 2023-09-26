@@ -14,7 +14,7 @@ exports.register = async (req, res) => {
 			const loginUser = await User.findOne({ login });
 
 			if (loginUser) {
-				deleteUploadedFile(req.file.filename);
+				if(req.file.filename) deleteUploadedFile(req.file.filename);
 				return res.status(409).send({ message: 'User with this login already exist' });
 			}
 			
@@ -30,12 +30,12 @@ exports.register = async (req, res) => {
 			res.status(201).send({ message: 'User created ' + user.login });
 
 		} else {
-			deleteUploadedFile(req.file.filename);
+			if(req.file.filename) deleteUploadedFile(req.file.filename);
 			res.status(400).send({ message: 'Bed request' });
 		}
 
 	} catch (err) {
-		deleteUploadedFile(req.file.filename);
+		if(req.file.filename) deleteUploadedFile(req.file.filename);
 		res.status(500).send({ message: err.message });
 	}
 };
@@ -47,16 +47,32 @@ exports.login = async (req, res) => {
 		
 		if (login && typeof login === 'string' && password && typeof password === 'string') {
 			const user = await User.findOne({ login });
+			
 			if (!user) {
 				res.status(400).send({ message: 'Login or password are incorrect' });
 			} else {
 				if (bcrypt.compareSync(password, user.password)) {
+					req.session.authenticated = true;
 					req.session.user = { id: user.id, login: user.login };
-					res.status(200).send({ message: 'Login successful' });
+					const obj = {
+            user: req.session.user.login,
+            isAuthenticated: true
+          };
+
+          res.status(200)
+            .cookie('connect-test.sid', obj, { maxAge: 360000 })
+            .json({ info: 'Cookie set successfully' });
+
+
+					
+					// res.json(req.session);
+					//res.status(200).send({ message: 'Login successful' });
 				} else {
 					res.status(400).send({ message: 'Login or password are incorrect' });
 				}
 			}
+		} else {
+			res.status(400).send({ message: 'Bad request' });
 		}
 
 	} catch(err) {
@@ -65,7 +81,17 @@ exports.login = async (req, res) => {
 };
 
 exports.getUser = async (req, res) => {
-	res.send({ message: req.session.login });
+	try {
+		if(req.session.authenticated) {
+			res.json(req.session);
+		} else {
+			res.status(404).send({message: 'Session not found'});
+		}
+		
+	} catch(err) {
+		res.status(500).send({ message: err.message });
+	}
+	
 };
 
 exports.logout = async (req, res) => {

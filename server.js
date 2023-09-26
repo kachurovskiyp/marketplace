@@ -4,13 +4,14 @@ const cors = require('cors');
 const connectiondb = require('./db/db.js');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
+const configure = require('./utils/configure');
 
 const app = express();
 
 if(process.env.NODE_ENV !== 'production') {
   app.use(
     cors({
-      origin: ['http://localhost:3000'],
+      origin: [configure.clientServerURI],
       credentials: true,
     })
   );
@@ -26,8 +27,11 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(session({
   secret: 'xcs343',
-  store: MongoStore.create({ mongoUrl: 'mongodb://localhost:27017/Marketplace' }),
+  store: MongoStore.create({ mongoUrl: configure.dbServerURI }),
 	cookie: {
+		httpOnly: false,
+		maxAge: 30000,
+		sameSite: 'none',
 		secure: process.env.NODE_ENV == 'production',
 	},
   resave: false,
