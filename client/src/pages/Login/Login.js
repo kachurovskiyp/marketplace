@@ -7,8 +7,11 @@ import { logIn } from '../../store/usersReducer';
 
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
-import Alert from 'react-bootstrap/Alert';
-import Spinner from 'react-bootstrap/Spinner';
+
+import Spiner from '../../views/Spiner/Spiner';
+import SuccessAlert from '../../views/SuccessAlert/SuccessAlert';
+import ServerErroAlert from '../../views/ServerErrorAlert/ServerErrorAlert';
+import ClientErrorAlert from '../../views/ClientErrorAlert/ClientErrorAlert'
 
 import { serverURI } from '../../configure';
 
@@ -19,7 +22,7 @@ const Login = () => {
 	const [login, setLogin] = useState('');
 	const [password, setPassword] = useState('');
 	const [status, setStatus] = useState(null);
-
+	
 	const handleSubmit = e => {
 		e.preventDefault();
 
@@ -30,51 +33,32 @@ const Login = () => {
 			},
 			body: JSON.stringify({ login, password })
 		}
+
 		setStatus('loading');
+
 		fetch(`${serverURI}auth/login`, options)
-			.then(res => {
-				if (res.status === 200) {
-					setStatus('success');
-					dispatch(logIn({ login }));
-					navigate('/');
-				} else if (res.status === 400) {
-					setStatus('clientError');
-				} else {
-					setStatus('serverError');
-				}
-			}).catch(err => {
-				setStatus('serverError');
-			});
+		.then(res => {
+			if (res.status === 200) {
+						setStatus('success');
+					} else if (res.status === 400) {
+						setStatus('clientError');
+					} else {
+						setStatus('serverError');
+					}
+			return res.json();
+		})
+		.then(data => {
+			dispatch(logIn(data));
+			navigate('/');
+		})
 	}
 
 	return (
 		<>
-			{status === 'success' && (
-				<Alert variant='success'>
-					<Alert.Heading>Success!</Alert.Heading>
-					<p>You have been successfuly logged in</p>
-				</Alert>
-			)}
-
-			{status === 'serverError' && (
-				<Alert variant='danger'>
-					<Alert.Heading>Something went wrong</Alert.Heading>
-					<p>Unexpected error... Try again!</p>
-				</Alert>
-			)}
-
-			{status === 'clientError' && (
-				<Alert variant='danger'>
-					<Alert.Heading>Incorrect data</Alert.Heading>
-					<p>Login or password are incorrect</p>
-				</Alert>
-			)}
-
-			{status === 'loading' && (
-				<Spinner animation="border" role="status" className='block mx-auto'>
-					<span className="visually-hidden">Loading...</span>
-				</Spinner>)
-			}
+			{status === 'success' && (<SuccessAlert text='You have been successfuly logged in' />)}
+			{status === 'serverError' && (<ServerErroAlert />)}
+			{status === 'clientError' && (<ClientErrorAlert title='Incorrect data' text='Login or password are incorrect' />)}
+			{status === 'loading' && (<Spiner />)}
 
 			<Form className='col-12 col-sm-3 mx-auto' onSubmit={handleSubmit}>
 				<h2 className='my-4'>Sing up</h2>

@@ -4,7 +4,10 @@ const getImageFileType = require('../utils/getImageFileType');
 
 exports.getAll = async (req, res) => {
 	try {
-		const ads = await Ad.find();
+		const ads = await Ad.find().populate({
+			path: 'seller',
+			select: '_id avatar login phone'
+		});
 		if (!ads) return res.status(404).send({ message: 'Not found' });
 		res.json(ads);
 	} catch (err) {
@@ -41,8 +44,8 @@ exports.addAd = async (req, res) => {
 				seller
 			});
 
-			await newAd.save();
-			res.status(200).send({ message: 'New ad added!' });
+			await newAd.save()
+			res.status(200).json(newAd);
 		} else {
 			return res.status(400).send('Bad request');
 		}
@@ -77,22 +80,27 @@ exports.changeAd = async (req, res) => {
 			const image = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif'].includes(fileType) ? req.file.filename : 'unset';
 
 			const ad = await Ad.findById(req.params.id);
-			if(!ad) return res.status(404).send({message: 'Not found'});
+			if (!ad) return res.status(404).send({ message: 'Not found' });
 
 			if (title && typeof title === 'string') {
-				await Ad.updateOne({ _id: req.params.id }, {
-					$set: {
-						title,
-						description,
-						date,
-						image,
-						price,
-						localization,
-						seller
-					}
-				});
-
-				res.status(200).send({ message: 'Ad is changed' });
+				await Ad.findByIdAndUpdate(
+					{ _id: req.params.id },
+					{
+						$set: {
+							title,
+							description,
+							date,
+							image,
+							price,
+							localization,
+							seller
+						},
+					},
+					{ new: true })
+					.exec()
+					.then((data) => {
+						res.status(200).json(data);
+					});
 			} else {
 				return res.status(400).send('Bad request');
 			}

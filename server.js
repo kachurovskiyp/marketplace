@@ -20,8 +20,8 @@ if(process.env.NODE_ENV !== 'production') {
 }
 
 // Serve static files from the React app
-app.use(express.static(path.join(__dirname + '/client/build')));
-app.use(express.static(path.join(__dirname + '/public/upload')));
+app.use(express.static(path.join(__dirname, 'client', 'build')));
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -29,9 +29,7 @@ app.use(session({
   secret: 'xcs343',
   store: MongoStore.create({ mongoUrl: configure.dbServerURI }),
 	cookie: {
-		httpOnly: false,
 		maxAge: 30000,
-		sameSite: 'none',
 		secure: process.env.NODE_ENV == 'production',
 	},
   resave: false,

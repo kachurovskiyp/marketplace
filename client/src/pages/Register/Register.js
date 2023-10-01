@@ -1,10 +1,14 @@
-import React from 'react'
+import React, { useState } from 'react';
+import { serverURI } from '../../configure';
+
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import Alert from 'react-bootstrap/Alert';
-import Spinner from 'react-bootstrap/Spinner';
-import { useState } from 'react';
-import { serverURI } from '../../configure';
+
+import Spiner from '../../views/Spiner/Spiner';
+import SuccessAlert from '../../views/SuccessAlert/SuccessAlert';
+import ServerErroAlert from '../../views/ServerErrorAlert/ServerErrorAlert';
+import ClientErrorAlert from '../../views/ClientErrorAlert/ClientErrorAlert'
 
 
 const Register = () => {
@@ -51,27 +55,10 @@ const Register = () => {
 
 	return (
 		<>
-			{status === 'success' && (
-				<Alert variant='success'>
-					<Alert.Heading>Success!</Alert.Heading>
-					<p>You have been successfuly registred! you can log in now</p>
-				</Alert>
-			)}
-
-			{status === 'serverError' && (
-				<Alert variant='danger'>
-					<Alert.Heading>Something went wrong</Alert.Heading>
-					<p>Unexpected error... Try again!</p>
-				</Alert>
-			)}
-
-			{status === 'clientError' && (
-				<Alert variant='danger'>
-					<Alert.Heading>No enough data!</Alert.Heading>
-					<p>You have to fill all the fields</p>
-				</Alert>
-			)}
-
+			{status === 'success' && (<SuccessAlert text='You have been successfuly registred! you can log in now' />)}
+			{status === 'serverError' && (<ServerErroAlert />)}
+			{status === 'clientError' && (<ClientErrorAlert title='No enough data!' text='You have to fill all the fields' />)}
+			{status === 'loading' && (<Spiner />)}
 			{status === 'loginError' && (
 				<Alert variant='warning'>
 					<Alert.Heading>Login is already in use</Alert.Heading>
@@ -79,11 +66,7 @@ const Register = () => {
 				</Alert>
 			)}
 
-			{status === 'loading' && (
-				<Spinner animation="border" role="status" className='block mx-auto'>
-					<span className="visually-hidden">Loading...</span>
-				</Spinner>)
-			}
+			
 
 
 			<Form className='col-12 col-sm-3 mx-auto' onSubmit={handleSubmit}>

@@ -4,7 +4,7 @@ import styles from './NavBar.module.scss';
 
 import Stack from 'react-bootstrap/Stack';
 
-const NavBar = () => {
+const NavBar = ({user}) => {
 	return (
 		<>
 			<Stack direction='horizontal' gap={2}>
@@ -13,8 +13,17 @@ const NavBar = () => {
 						<ul className={styles.navlist}>
 						<Stack direction='horizontal' gap={3}>
 							<li className={`${styles.navitem} p-2`}><NavLink to='/'>Home</NavLink></li>
-							<li className={`${styles.navitem} p-2`}><NavLink to='/register'>Register</NavLink></li>
-							<li className={`${styles.navitem} p-2`}><NavLink to='/login'>Login</NavLink></li>
+							{user.login ? 
+							(<>
+							<li className={`${styles.navitem} p-2`}><NavLink to='/logout'>Logout</NavLink></li>
+							<li className={`${styles.navitem} p-2`}><NavLink to='/createad'>New ad</NavLink></li>
+							</>)
+							:
+							(<>
+								<li className={`${styles.navitem} p-2`}><NavLink to='/register'>Register</NavLink></li>
+								<li className={`${styles.navitem} p-2`}><NavLink to='/login'>Login</NavLink></li> 
+								</>)
+							}
 							</Stack>
 						</ul>
 				</nav>

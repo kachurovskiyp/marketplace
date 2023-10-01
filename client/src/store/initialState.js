@@ -1,5 +1,6 @@
 const initialState = {
-	user: {}
+	user: {},
+	ad: []
 };
 
 export default initialState;

@@ -54,19 +54,7 @@ exports.login = async (req, res) => {
 				if (bcrypt.compareSync(password, user.password)) {
 					req.session.authenticated = true;
 					req.session.user = { id: user.id, login: user.login };
-					const obj = {
-            user: req.session.user.login,
-            isAuthenticated: true
-          };
-
-          res.status(200)
-            .cookie('connect-test.sid', obj, { maxAge: 360000 })
-            .json({ info: 'Cookie set successfully' });
-
-
-					
-					// res.json(req.session);
-					//res.status(200).send({ message: 'Login successful' });
+					res.json(req.session.user);
 				} else {
 					res.status(400).send({ message: 'Login or password are incorrect' });
 				}
